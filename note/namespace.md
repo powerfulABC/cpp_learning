@@ -33,7 +33,7 @@
         LOL::goAttack();       //  attack in LOL
     }
 
-####3、命名空间可以里放变量，函数，结构体，类。。。
+#### 3、命名空间可以里放变量，函数，结构体，类。。。
     namespace A{
         int m_A = 3;
         void func();
@@ -41,7 +41,7 @@
         class Animal{};
     };
 
-####4、命名空间必须声明在全局作用域下
+#### 4、命名空间必须声明在全局作用域下
 
 声明在局部作用域下会报错
 
@@ -52,7 +52,7 @@
     //  };
     }
 
-####5、命名空间可以嵌套
+#### 5、命名空间可以嵌套
     namespace TA{
         namespace TB{
             int testVal = 1;
@@ -64,7 +64,7 @@
         std::cout << TA::TB::testVal << std::endl;
     }
 
-####6、命名空间是开放的
+#### 6、命名空间是开放的
 
     namespace A{
         int m_B = 4;
@@ -76,7 +76,7 @@
         std::cout << A::m_B << std::endl;
     }
 
-####7、匿名命名空间
+#### 7、匿名命名空间
 
     namespace{
         int m_C = 1000; // 相当于static int m_C = 1000
@@ -84,7 +84,7 @@
     }
 
 
-####8、命名空间的别名
+#### 8、命名空间的别名
 
     namespace veryLongName
     {
@@ -94,16 +94,7 @@
 
     void test06()
     {
-    namespace veryShortName = veryLongName;
-    std::cout << veryShortName::m_E << std::endl;
+        namespace veryShortName = veryLongName;
+        std::cout << veryShortName::m_E << std::endl;
     }
 
-    // int main()
-    // {
-        //test01();
-        //test02();
-        //test04();
-        //test05();
-    //    test06();
-    //   return 0;
-    //}
