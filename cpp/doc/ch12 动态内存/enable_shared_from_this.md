@@ -11,7 +11,7 @@
 - 3、Session启动，注册监听读事件服务
 - 4、消息到达服务器时，触发回调函数HandleReadHeader处理消息头部
 
-在第1，2步都结束后, 由于函数都已经结束，Session对象实际已经被释放了，由于4是异步监听，新消息抵达服务器时， 由于Session对象已经被析构，再触发HandleReadHeader将会报错
+在第1，2步都结束后, 由于函数都已经结束，Session对象实际已经被释放了，由于4是异步监听，新消息抵达服务器时， 再触发HandleReadHeader将会报错
 
 ![alt text](./image/服务器监听场景.png)
 
