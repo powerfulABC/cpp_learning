@@ -22,7 +22,7 @@ protected:
 class SendMessage : public Message{
     friend class LogicSystem;
 public:
-    SendMessage(char* message, short length, short message_id);
+    SendMessage(const char* message, short length, short message_id);
     ~SendMessage() = default;
 
 private:

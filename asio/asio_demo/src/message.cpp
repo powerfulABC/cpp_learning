@@ -20,7 +20,7 @@ void Message::Clear()
     cur_length_ = 0;
 }
 
-SendMessage::SendMessage(char *message, short length, short message_id)
+SendMessage::SendMessage(const char *message, short length, short message_id)
     : Message(length + HEADER_LENGTH), message_id_(message_id)
 {
     short message_id_net = boost::asio::detail::socket_ops::host_to_network_short(message_id_);

@@ -50,10 +50,10 @@ void Session::Send(const char *message, short length, short message_id)
     }
     
     std::shared_ptr<SendMessage> msg = send_message_queue_.front();
-    boost::asio::write(
+    boost::asio::async_write(
         socket_,
         boost::asio::buffer(msg->data_, msg->max_length_),
-        std::bind(&Session::HandleWrite, std::placeholders::_1, shared_from_this())
+        std::bind(&Session::HandleWrite, this, std::placeholders::_1, shared_from_this())
     );
 }
 
@@ -63,7 +63,7 @@ void Session::Close()
     socket_closed_ = true;
 }
 
-void Session::HandleReadHeader(boost::system::error_code &ec, std::size_t bytes_transferred, std::shared_ptr<Session> self_shared)
+void Session::HandleReadHeader(const boost::system::error_code &ec, size_t bytes_transferred, std::shared_ptr<Session> self_shared)
 {
     if (!ec)
     {
@@ -92,7 +92,7 @@ void Session::HandleReadHeader(boost::system::error_code &ec, std::size_t bytes_
     }
 }
 
-void Session::HandleReadData(boost::system::error_code &ec, std::size_t bytes_transferred, std::shared_ptr<Session> self_shared)
+void Session::HandleReadData(const boost::system::error_code &ec, size_t bytes_transferred, std::shared_ptr<Session> self_shared)
 {
     if (ec)
     {
@@ -114,12 +114,12 @@ void Session::HandleReadData(boost::system::error_code &ec, std::size_t bytes_tr
     boost::asio::async_read(
         socket_,
         boost::asio::buffer(recv_header_->data_, HEADER_LENGTH),
-        std::bind(&Session::HandleReadHeader, this, std::placeholders::_1, std::placeholders::_2, shared_from_this())
+        std::bind(&Session::HandleReadHeader, this, std::placeholders::_1, std::placeholders::_2, self_shared)
     );
     
 }
 
-void Session::HandleWrite(boost::system::error_code & ec, std::shared_ptr<Session> self_shared)
+void Session::HandleWrite(const boost::system::error_code & ec, std::shared_ptr<Session> self_shared)
 {
     if (ec)
     {
@@ -136,10 +136,10 @@ void Session::HandleWrite(boost::system::error_code & ec, std::shared_ptr<Sessio
     if (!send_message_queue_.empty())
     {
         std::shared_ptr<SendMessage> msg = send_message_queue_.front();
-        boost::asio::write(
+        boost::asio::async_write(
             socket_,
             boost::asio::buffer(msg->data_, msg->max_length_),
-            std::bind(&Session::HandleWrite, std::placeholders::_1, shared_from_this())
+            std::bind(&Session::HandleWrite, this, std::placeholders::_1, self_shared)
         );
     }
 }

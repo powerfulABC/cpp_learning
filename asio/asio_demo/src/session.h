@@ -22,9 +22,9 @@ public:
     void Close();
 
 private:
-    void HandleReadHeader(boost::system::error_code& ec, std::size_t bytes_transferred, std::shared_ptr<Session>);
-    void HandleReadData(boost::system::error_code& ec, std::size_t bytes_transferred, std::shared_ptr<Session>);
-    void HandleWrite(boost::system::error_code& ec, std::shared_ptr<Session>);
+    void HandleReadHeader(const boost::system::error_code& ec, size_t bytes_transferred, std::shared_ptr<Session>);
+    void HandleReadData(const boost::system::error_code& ec, size_t bytes_transferred, std::shared_ptr<Session>);
+    void HandleWrite(const boost::system::error_code& ec, std::shared_ptr<Session>);
     void HandleErrror();
 
 private:

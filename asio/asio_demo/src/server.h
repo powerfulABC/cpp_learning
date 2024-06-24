@@ -17,7 +17,7 @@ public:
     void ClearSession(const std::string& session_id);
 
 private:
-    void HandleAccept(boost::system::error_code& ec, std::shared_ptr<Session> session);
+    void HandleAccept(const boost::system::error_code& ec, std::shared_ptr<Session> session);
 
 private:
     boost::asio::io_context& ioc_;
