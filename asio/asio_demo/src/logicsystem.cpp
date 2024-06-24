@@ -10,7 +10,7 @@ void LogicSystem::PostMessageToQueue(std::shared_ptr<LogicNode> logic_message)
 {
     std::unique_lock<std::mutex> lock(logic_mutex_);
     logic_message_queue_.push(logic_message);
-    if (logic_message_queue_.size() >= 1)
+    if (logic_message_queue_.size() == 1)
     {
         lock.unlock();
         consume_.notify_one();
@@ -59,6 +59,9 @@ void LogicSystem::Run()
             logic_node->recv_message_->message_id_, 
             std::string(logic_node->recv_message_->data_, logic_node->recv_message_->max_length_)
         );
+
+        // logic node 出队
+        logic_message_queue_.pop();
     }
 }
 

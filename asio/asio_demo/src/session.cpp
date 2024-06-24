@@ -6,11 +6,13 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cstring>
+#include "logicsystem.h"
 
 Session::Session(boost::asio::io_context &ioc, Server *server)
     : ioc_(ioc), server_(server), socket_closed_(false), socket_(ioc)
 {
     uuid_ = boost::uuids::to_string(boost::uuids::random_generator()());
+    log_message("session " + uuid() + " created.");
     recv_header_ = std::make_shared<Message>(HEADER_LENGTH);
 }
 
@@ -79,6 +81,8 @@ void Session::HandleReadHeader(const boost::system::error_code &ec, size_t bytes
         short message_id_host = boost::asio::detail::socket_ops::network_to_host_short(message_id_net);
         short message_size_host = boost::asio::detail::socket_ops::network_to_host_short(message_size_net);
 
+        log_message("session " + uuid() + " has received message header. message id: [" + std::to_string(message_id_host) + "], message size: [" + std::to_string(message_size_host) + "]");
+
         recv_message_ = std::make_shared<RecvMessage>(message_size_host, message_id_host);
         boost::asio::async_read(
             socket_,
@@ -109,7 +113,12 @@ void Session::HandleReadData(const boost::system::error_code &ec, size_t bytes_t
     }
 
     recv_message_->data_[recv_message_->max_length_] = '\0';
-
+    
+    // 将消息放入logic queue
+    log_message("session " + uuid() + " has received message data. message: [" + std::string(recv_message_->data_, recv_message_->max_length_) + "]");
+    std::shared_ptr<LogicNode> logic_node = std::make_shared<LogicNode>(shared_from_this(), recv_message_); 
+    LogicSystem::instance()->PostMessageToQueue(logic_node);
+    
     recv_header_->Clear();
     boost::asio::async_read(
         socket_,

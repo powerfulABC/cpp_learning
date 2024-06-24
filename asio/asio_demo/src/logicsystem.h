@@ -18,12 +18,14 @@ typedef std::function<void(std::shared_ptr<Session>, const short&, const std::st
 
 class LogicSystem : public Singleton<LogicSystem>
 {
+    friend class Singleton<LogicSystem>;
 public:
     void PostMessageToQueue(std::shared_ptr<LogicNode> logic_message);
+    ~LogicSystem() = default;
     
 private:
     LogicSystem();
-
+    
     void RegisterCallBackFunction();
 
     // 运行逻辑处理系统

@@ -5,7 +5,7 @@
 Server::Server(boost::asio::io_context &ioc, short port)
     : ioc_(ioc), acceptor_(ioc, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)), port_(port)
 {
-    log_message("Server start.");
+    log_message("Server start. (port = " + std::to_string(port_) + ")");
     Start();
 }
 
