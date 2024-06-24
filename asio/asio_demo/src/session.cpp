@@ -8,7 +8,7 @@
 #include <cstring>
 
 Session::Session(boost::asio::io_context &ioc, Server *server)
-    : ioc_(ioc), server_(server)
+    : ioc_(ioc), server_(server), socket_closed_(false), socket_(ioc)
 {
     uuid_ = boost::uuids::to_string(boost::uuids::random_generator()());
     recv_header_ = std::make_shared<Message>(HEADER_LENGTH);
@@ -22,6 +22,45 @@ void Session::Start()
         boost::asio::buffer(recv_header_->data_, HEADER_LENGTH),
         std::bind(&Session::HandleReadHeader, this, std::placeholders::_1, std::placeholders::_2, shared_from_this())
     );
+}
+
+void Session::Send(const std::string &message, short message_id)
+{
+    Send(message.c_str(), message.size(), message_id);
+}
+
+void Session::Send(const char *message, short length, short message_id)
+{
+    std::lock_guard<std::mutex> lock(send_mutex_);
+    int send_message_queue_size = send_message_queue_.size();
+
+    // 发送队列已满
+    if (send_message_queue_size > MAX_SEND_QUEUE_SIZE)
+    {
+        log_message("session " + uuid() + ": send queue is full.");
+        return;
+    }
+
+    send_message_queue_.push(std::make_shared<SendMessage>(message, length, message_id));
+
+    // 还有未发送完的消息，入队后结束
+    if (send_message_queue_size > 0)
+    {
+        return;
+    }
+    
+    std::shared_ptr<SendMessage> msg = send_message_queue_.front();
+    boost::asio::write(
+        socket_,
+        boost::asio::buffer(msg->data_, msg->max_length_),
+        std::bind(&Session::HandleWrite, std::placeholders::_1, shared_from_this())
+    );
+}
+
+void Session::Close()
+{
+    socket_.close();
+    socket_closed_ = true;
 }
 
 void Session::HandleReadHeader(boost::system::error_code &ec, std::size_t bytes_transferred, std::shared_ptr<Session> self_shared)
@@ -49,7 +88,7 @@ void Session::HandleReadHeader(boost::system::error_code &ec, std::size_t bytes_
     }
     else{
         log_error_message(ec, "session " + uuid() + ": reading message header.");
-        server_->ClearSession(uuid());
+        HandleErrror();
     }
 }
 
@@ -58,7 +97,7 @@ void Session::HandleReadData(boost::system::error_code &ec, std::size_t bytes_tr
     if (ec)
     {
         log_error_message(ec, "session " + uuid() + ": reading message.");
-        server_->ClearSession(uuid());
+        HandleErrror();
         return;
     }
 
@@ -78,4 +117,35 @@ void Session::HandleReadData(boost::system::error_code &ec, std::size_t bytes_tr
         std::bind(&Session::HandleReadHeader, this, std::placeholders::_1, std::placeholders::_2, shared_from_this())
     );
     
+}
+
+void Session::HandleWrite(boost::system::error_code & ec, std::shared_ptr<Session> self_shared)
+{
+    if (ec)
+    {
+        log_error_message(ec, "session " + uuid() + ": reading message.");
+        HandleErrror();
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(send_mutex_);
+    // 队列首端message发送成功，出队
+    send_message_queue_.pop();
+    
+    // 队列中仍有message，继续发送
+    if (!send_message_queue_.empty())
+    {
+        std::shared_ptr<SendMessage> msg = send_message_queue_.front();
+        boost::asio::write(
+            socket_,
+            boost::asio::buffer(msg->data_, msg->max_length_),
+            std::bind(&Session::HandleWrite, std::placeholders::_1, shared_from_this())
+        );
+    }
+}
+
+void Session::HandleErrror()
+{
+    server_->ClearSession(uuid());
+    Close();
 }

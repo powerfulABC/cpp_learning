@@ -6,5 +6,6 @@ add_executable(${PROJECT_NAME}
     server.cpp
     const.cpp
     session.cpp
+    logicsystem.cpp
 )
 

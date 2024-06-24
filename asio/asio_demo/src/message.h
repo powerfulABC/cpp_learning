@@ -4,6 +4,8 @@
 #include "const.h"
 #include "session.h"
 
+class LogicSystem;
+
 class Message{
     friend class Session;
 public:
@@ -18,6 +20,7 @@ protected:
 };
 
 class SendMessage : public Message{
+    friend class LogicSystem;
 public:
     SendMessage(char* message, short length, short message_id);
     ~SendMessage() = default;
@@ -27,6 +30,7 @@ private:
 };
 
 class RecvMessage : public Message{
+    friend class LogicSystem;
 public:
     RecvMessage(short length, short message_id);
     ~RecvMessage() = default;
@@ -36,7 +40,10 @@ private:
 };
 
 
+
+
 class LogicNode{
+    friend class LogicSystem;
 public:
     LogicNode(std::shared_ptr<Session>, std::shared_ptr<RecvMessage>);
     ~LogicNode() = default;
