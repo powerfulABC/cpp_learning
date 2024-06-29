@@ -15,22 +15,21 @@ int main()
     
     boost::asio::ip::tcp::socket sock(ioc);
     boost::asio::ip::tcp::acceptor acc(ioc, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port));
-    acc.accept(sock, ec);
+    acc.accept(sock);
 
     // read
     memset(buf, 0, sizeof(buf));
     std::size_t recv_len;
-    std::string recv_message(""); 
-    printf("client say:\n");
-    while((recv_len = sock.read_some(boost::asio::buffer(buf, 1024))) > 0)
+    std::string recv_message("");
+
+    sock.read_some(boost::asio::buffer(buf, 1024), ec);
+    if (!ec)
     {
-        std::string str(buf);
-        recv_message += str;
-        printf("%s", buf);
+        recv_message = std::string(buf, 1024);
+        std::cout << "read successfully" << std::endl;
+        std::cout << recv_message << std::endl;
     }
 
-    printf("send to server:\n");
-    sock.send(boost::asio::buffer(recv_message.c_str(), recv_message.size()));
-
-    printf("send over");
+    sock.send(boost::asio::buffer(recv_message));
+    
 }
