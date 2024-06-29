@@ -1,9 +1,11 @@
 # Charpter 01 Asio基本概念
+
 ## 1.1 网络编程的基本流程
 
 ![alt text](images/网络编程的基本流程.png)
 
 图的左侧TCP客户端的流程：
+
 1. `socket()`：创建一个套接字。
 2. `connect()`：与服务器建立连接。
 3. `write()`：发送请求数据。
@@ -11,6 +13,7 @@
 5. `close()`：关闭连接。
 
 图的右侧TCP服务器端的流程：
+
 1. `socket()`：创建一个套接字。
 2. `bind()`：绑定到特定的端口。
 3. `listen()`：监听连接请求。
@@ -96,9 +99,12 @@
 ```
 
 ## 1.4 Asio缓冲区的概念
+
 Asio网络库中常用的发送接收函数要传输的数据结构是一个特殊的结构。如下图所示，asio中的buffer是一个存储了一系列消息（存储了字符串和他的长度）的指针数组
+
 ![alt text](images/asio::buffer示意图.png)
 
 buffer可以分为两类: const_buffer和mutable_buffer，对于接收消息的函数，它所使用的buffer是一个mutable_buffer，而对于发送消息的函数，它所使用的buffer是一个const_buffer。<br/>
 
 通过使用函数`boost::asio::buffer(buf, buf_size)`可以构造一个buffer结构，并根据需要自动转换为mutable_buffer/const_buffer
+
