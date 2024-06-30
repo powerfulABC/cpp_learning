@@ -1,0 +1,5 @@
+> 使用valgrind调查内存泄漏并将结果写入文件valfrind_01.txt中<br/>
+> ./asio_client 是被调查的可执行文件
+```shell
+valgrind --leak-check=full ./asio_client > ../valfrind_01.txt 2>&1
+```
