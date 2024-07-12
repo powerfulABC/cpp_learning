@@ -1,0 +1,1 @@
+g++ -fdump-lang-class polymorphism_dynamic.cpp

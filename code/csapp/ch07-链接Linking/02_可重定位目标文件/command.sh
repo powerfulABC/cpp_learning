@@ -17,4 +17,7 @@ readelf -h main.o > main.elfheader
 readelf -S main.o > main.elfsectionheaders
 
 # > 将可重定向文件反汇编成汇编代码
+# objdump: 可以用来查看不同格式的二进制文件（如 ELF、PE/COFF 等）的多种信息，包括但不限于程序的汇编代码、符号表、重定位信息等。
+# -s, --full-contents: 显示二进制文件的完整内容，即文件的每一个字节都会以十六进制的形式打印出来，并且每行之后跟随着相应的 ASCII 表示
+# -d, --disassemble: 反汇编二进制文件的可执行部分
 objdump -s -d main.o > main.s
